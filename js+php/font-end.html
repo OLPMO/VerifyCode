@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+<style>
+	#box{
+		overflow:hidden;
+		width:150px;
+		height:50px;
+		border:solid 1px black;
+		margin:10px 10px;
+		background:url('1.jpg');
+		z-index:10;
+	}
+	canvas{
+		border:1px solid red;
+		width:30px;
+		height:40px;
+		z-index:10000;
+	}
+</style>
+</head>
+<body>
+<div id="container">
+	<div id="box">
+		<canvas id="code0"></canvas>
+		<canvas id="code1"></canvas>
+		<canvas id="code2"></canvas>
+		<canvas id="code3"></canvas>
+	</div>
+
+	<div id="box1">
+		<form>
+			<label for="itext">验证码:</label>
+			<input id="itext" type="text" placeholder="双击切换验证码">
+			<button id="btn">确定</button>
+		</form>
+	</div>
+</div>
+<script>
+	var context = new Array(4);
+	var num = [1,2,3,'a'];
+	//产生一个[minValue,maxValue]区间（包括minValue和maxValue）的随机整数
+	function myRand(minValue,maxValue){
+		let tmp;
+		let ranMultiply = 1;
+		let distance = maxValue - minValue;
+		let tmpmin = minValue,tmpmax = maxValue;
+		//确保minValue为最小值，而maxValue为最大值
+		minValue = tmpmin < tmpmax ? tmpmin : tmpmax;
+		maxValue = tmpmax > tmpmin ? tmpmax : tmpmin;
+		if(minValue < 0 && maxValue > 0){
+		//最小值小于零，最大值大于零
+			tmp = distance ; 
+		}else{
+		//最小值最大值都大于零或都小于零
+			tmp = maxValue;
+		}
+		
+		while( tmp > 1 || tmp <-1){
+			tmp /= 10.0;
+			ranMultiply *=10;
+		}
+			
+		
+			
+		return Math.round(Math.random()*ranMultiply % parseInt(distance)) + parseInt( minValue ); 
+		
+		
+	}
+	for(var i=0;i<4;i++){
+		var drawing = document.getElementById('code'+i);
+		context[i] = drawing.getContext("2d");
+		context[i].font = "bold 20px Arial";
+		context[i].textBaseLine = "middle";
+		context[i].translate();
+		context[i].rotate( myRand(-55,55) * Math.PI / 180);
+		context[i].fillStyle = "white";
+		context[i].fillText(num[i],10,10);	
+	}
+	var uinput = document.getElementById('itext');
+	uinput.onblur = function(){
+		let flag = true;
+		if(this.value.length != 4){
+			flag = false;
+		}
+		for(let j = 0;j < 4;j++){
+			if( this.value[i] !== num[i]){
+				flag = false;
+				break;
+			}
+		}
+		if(flag){
+			alert('ok');
+		}else{
+			alert('error');
+		}
+	}
+</script>
+</body>
+</html>
