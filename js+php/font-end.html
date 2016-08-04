@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <title></title>
 <style>
-	#box{
+	.vrfCodeContainer{
 		overflow:hidden;
-		width:150px;
-		height:50px;
+		width:120px;
+		height:35px;
 		border:solid 1px black;
 		margin:10px 10px;
-		background:url('1.jpg');
+		padding:0 0 ;
 		z-index:10;
 	}
-	canvas{
-		border:1px solid red;
-		width:30px;
-		height:40px;
+	.vrfCode{
+/*		border:1px solid red;*/
+		margin:0 0;
+		padding:0 0;
 		z-index:10000;
 	}
 </style>
 </head>
 <body>
 <div id="container">
-	<div id="box">
-		<canvas id="code0"></canvas>
-		<canvas id="code1"></canvas>
-		<canvas id="code2"></canvas>
-		<canvas id="code3"></canvas>
+	<div class="vrfCodeContainer" id="box">
+		<canvas width="25" height="40" class="vrfCode" id="code0"></canvas>
+		<canvas width="25" height="40" class="vrfCode" id="code1"></canvas>
+		<canvas  width="25" height="40" class="vrfCode" id="code2"></canvas>
+		<canvas  width="25" height="40" class="vrfCode" id="code3"></canvas>
 	</div>
 
 	<div id="box1">
@@ -38,15 +38,18 @@
 		</form>
 	</div>
 </div>
-<script>
-	var context = new Array(4);
-	var num = [1,2,3,'a'];
+
+</body>
+</html>
+<script type="text/javascript" src="http://localhost/jQuery/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">
+	
 	//产生一个[minValue,maxValue]区间（包括minValue和maxValue）的随机整数
 	function myRand(minValue,maxValue){
-		let tmp;
-		let ranMultiply = 1;
-		let distance = maxValue - minValue;
-		let tmpmin = minValue,tmpmax = maxValue;
+		var tmp;
+		var ranMultiply = 1;
+		var distance = maxValue - minValue;
+		var tmpmin = minValue,tmpmax = maxValue;
 		//确保minValue为最小值，而maxValue为最大值
 		minValue = tmpmin < tmpmax ? tmpmin : tmpmax;
 		maxValue = tmpmax > tmpmin ? tmpmax : tmpmin;
@@ -61,42 +64,92 @@
 		while( tmp > 1 || tmp <-1){
 			tmp /= 10.0;
 			ranMultiply *=10;
+		}	
+		return Math.round(Math.random()*ranMultiply % parseInt(distance)) + parseInt( minValue ); 	
+	}
+	
+	/*function createVerifyCode(code,codeColor,bgUrl){
+	*功能：跟据验证码字符串生成图片，由于样式问题，目前支持生成4为的验证码
+	*
+	*code：验证码字符串
+	*codeColor：验证码的颜色（因为要根据背景设置，所以将其设置为变量）
+	*bgUrl：背景图的URL
+	*
+	*返回值：若用户输入与验证码一致，返回true，否则返回false
+	*/
+	function createVerifyCode(code,codeColor,bgUrl){
+		if( 4 != code.length){
+			return false
 		}
+		var drawing = new Array(4);
+		var context = new Array(4);
+		vrfContainer = document.getElementsByClassName("vrfCodeContainer");
+		vrfContainer[0].style.background = vrfContainer[0].style.background + " url("+bgUrl+")";
+		drawing = document.getElementsByClassName('vrfCode');	
+		//drawing[i].width:300,+drawing[i].height:150
+		for(var i=0;i<4;i++){
+			context[i] = drawing[i].getContext("2d");
+			context[i].font = "bold 20px Arial";
+			context[i].textBaseLine = "middle";
+			context[i].textAlign = "center";
+			//要把画布转换回来，才不会使旋转角度累积，否则旋转角度会大于180度，使用户难以识别验证码
+			context[i].rotate( -lastRotateDegree[i] * Math.PI / 180,12,20);
+			//清空画布  
+			context[i].clearRect(0,0,2*drawing[i].width,2*drawing[i].height);
 			
-		
-			
-		return Math.round(Math.random()*ranMultiply % parseInt(distance)) + parseInt( minValue ); 
-		
-		
+			lastRotateDegree[i] = myRand(-30,30);
+			context[i].rotate( lastRotateDegree[i] * Math.PI / 180,12,20);
+			context[i].fillStyle = codeColor ;
+			context[i].fillText(code[i],12,20);
+		}
+		return true;
 	}
-	for(var i=0;i<4;i++){
-		var drawing = document.getElementById('code'+i);
-		context[i] = drawing.getContext("2d");
-		context[i].font = "bold 20px Arial";
-		context[i].textBaseLine = "middle";
-		context[i].translate();
-		context[i].rotate( myRand(-55,55) * Math.PI / 180);
-		context[i].fillStyle = "white";
-		context[i].fillText(num[i],10,10);	
-	}
-	var uinput = document.getElementById('itext');
-	uinput.onblur = function(){
-		let flag = true;
-		if(this.value.length != 4){
+	
+	/*function checkVerifyCode(userInput,code)
+	*功能：教验验证码。若用户输入与验证码一致
+	*userInput：用户输入字符串
+	*code：验证码字符串
+	*返回值：若用户输入与验证码一致，返回true，否则返回false
+	*/
+	function checkVerifyCode(userInput,code){
+		var flag = true;
+
+		if(userInput.length != 4){
 			flag = false;
 		}
-		for(let j = 0;j < 4;j++){
-			if( this.value[i] !== num[i]){
+		userInput = userInput.toLowerCase();
+		code = code.toLowerCase();
+		for(var j = 0;j < 4;j++){
+			if( userInput[j] !== code[j]){
 				flag = false;
 				break;
 			}
 		}
-		if(flag){
-			alert('ok');
-		}else{
-			alert('error');
-		}
+		return flag;
 	}
+	
+	//以下为使用例子
+	var uinput = document.getElementById('itext');
+	uinput.onblur = function(){
+		if(checkVerifyCode(this.value,code)){
+			alert("ok");
+		}else{
+			alert("error");
+		}
+	};
+	//用一个全局变量存储生成的验证码字符串
+	var code ;
+	//记录每一个画布上一次旋转的角度
+	var lastRotateDegree = [0,0,0,0];
+	document.getElementById("box").ondblclick = function (){
+		//由于原始的ajax技术麻烦，故使用jquery的ajax函数
+		$.post("http://localhost/test.php", { "codeCnt":4},
+		function(data){
+			//把后台生成的字符串储存起来
+			code = data;
+			createVerifyCode(data,"white",'1.jpg');	
+		},
+		"json");
+		
+	};
 </script>
-</body>
-</html>
