@@ -16,6 +16,6 @@ js+php文件夹存放的是js+canvas+php合作完成的验证码功能。
 
 rawphp文件夹存放的是纯php完成的验证码类。
 
--------------------------------------------
 License
-The Project is open-sourced software licensed under the BSD 3-clause License.
+-------------------------------------------
+This Project is open-sourced software licensed under the BSD 3-clause License.
